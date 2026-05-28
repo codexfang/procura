@@ -10,5 +10,3 @@ services:
         value: "sqlite:///./procura.db"
       - key: SCHEDULER_INTERVAL_MINUTES
         value: "15"
-      - key: OPENAI_API_KEY
-        sync: false
