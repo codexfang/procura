@@ -51,7 +51,7 @@ export const BACKEND_STATUS_KEY = CACHE_PREFIX + "backend_status";
 export async function checkBackend() {
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/health`,
+      `http://localhost:8000/health`,
       { signal: AbortSignal.timeout(5000) }
     );
     if (res.ok) {
