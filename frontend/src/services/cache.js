@@ -51,7 +51,7 @@ export const BACKEND_STATUS_KEY = CACHE_PREFIX + "backend_status";
 export async function checkBackend() {
   try {
     const res = await fetch(
-      `http://localhost:8000/health`,
+      `https://procura-onjp.onrender.com/health`,
       { signal: AbortSignal.timeout(5000) }
     );
     if (res.ok) {

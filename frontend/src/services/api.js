@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://procura-onjp.onrender.com";
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
