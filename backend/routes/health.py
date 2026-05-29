@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from db.database import get_db
@@ -25,6 +25,11 @@ def health_check():
         "service": "procura-api",
         "timestamp": datetime.utcnow().isoformat(),
     }
+
+
+@router.head("/health", include_in_schema=False)
+def health_head():
+    return Response(status_code=200)
 
 
 @router.get("/health/db")
