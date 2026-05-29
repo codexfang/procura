@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db.migrations import run_migrations
 from scheduler.scheduler import start_scheduler, stop_scheduler
+from scheduler.jobs import run_full_pipeline
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,6 +19,8 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Procura API server")
     run_migrations()
     start_scheduler()
+    logger.info("Running initial pipeline...")
+    run_full_pipeline()
     yield
     stop_scheduler()
     logger.info("Procura API server stopped")
