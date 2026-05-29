@@ -8,6 +8,16 @@ from datetime import datetime
 router = APIRouter()
 
 
+@router.get("/")
+def root():
+    return {
+        "service": "Procura API",
+        "version": "1.0.0",
+        "status": "operational",
+        "docs": "/docs",
+    }
+
+
 @router.get("/health")
 def health_check():
     return {
