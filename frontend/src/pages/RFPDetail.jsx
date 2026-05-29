@@ -7,6 +7,11 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!matchId) {
+      setLoading(false);
+      setMatch(null);
+      return;
+    }
     loadMatch();
   }, [matchId, backendOnline]);
 
@@ -18,14 +23,29 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
         setMatch(data);
       } else {
         const found = mockData.matches.find((m) => m.id === matchId);
-        setMatch(found || mockData.matches[0]);
+        setMatch(found || null);
       }
     } catch {
       const found = mockData.matches.find((m) => m.id === matchId);
-      setMatch(found || mockData.matches[0]);
+      setMatch(found || null);
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!matchId) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <h2 className="text-lg font-medium text-gray-500 mb-1">No RFP Selected</h2>
+        <p className="text-sm text-gray-400">Select a matched opportunity from the Dashboard to view its details.</p>
+        <button onClick={onBack} className="btn-primary mt-4">
+          Go to Dashboard
+        </button>
+      </div>
+    );
   }
 
   if (loading) return <LoadingSpinner message="Loading RFP details..." />;
@@ -44,7 +64,7 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
 
       <div className="card p-6 mb-4">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-gray-900">{rfp.title}</h1>
             <p className="text-sm text-gray-500 mt-1">{rfp.agency}</p>
           </div>
@@ -64,34 +84,34 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-        <div className="card p-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase">NAICS Code</p>
           <p className="text-sm font-medium mt-1">{rfp.naics_code || "N/A"}</p>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase">Set Aside</p>
           <p className="text-sm font-medium mt-1">{rfp.set_aside || "None"}</p>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase">Award Amount</p>
           <p className="text-sm font-medium mt-1">
             {rfp.award_amount ? `$${(rfp.award_amount / 1000000).toFixed(1)}M` : "N/A"}
           </p>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase">Posted</p>
           <p className="text-sm font-medium mt-1">
             {rfp.posted_date ? new Date(rfp.posted_date).toLocaleDateString() : "N/A"}
           </p>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase">Deadline</p>
           <p className="text-sm font-medium mt-1">
             {rfp.response_deadline ? new Date(rfp.response_deadline).toLocaleDateString() : "N/A"}
           </p>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase">Status</p>
           <p className="text-sm font-medium mt-1 capitalize">{rfp.status}</p>
         </div>
@@ -116,8 +136,8 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
           <ul className="space-y-1">
             {rfp.requirements?.map((req, i) => (
               <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                <span className="text-gov-500 mt-0.5">•</span>
-                {req}
+                <span className="text-gov-500 mt-0.5 shrink-0">•</span>
+                <span>{req}</span>
               </li>
             ))}
           </ul>
@@ -129,8 +149,8 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
         <div className="space-y-2">
           {match.match_reasons?.map((reason, i) => (
             <div key={i} className="flex items-start gap-2 text-sm text-gray-600">
-              <span className="text-green-500 mt-0.5">✓</span>
-              {reason}
+              <span className="text-green-500 mt-0.5 shrink-0">✓</span>
+              <span>{reason}</span>
             </div>
           ))}
         </div>

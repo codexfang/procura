@@ -30,7 +30,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggle })
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-40 h-full w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed top-0 left-0 z-40 min-h-screen w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto lg:min-h-screen ${
           collapsed ? "-translate-x-full" : "translate-x-0"
         }`}
       >

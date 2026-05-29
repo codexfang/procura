@@ -209,6 +209,44 @@ const MOCK_DRAFTS = MOCK_RFPS.slice(0, 5).map((rfp, i) => {
     `We are pleased to submit this proposal for ${rfp.title}. Our approach aligns directly with ${rfp.agency}'s mission objectives and technical requirements.`,
   ];
 
+  const sections = [
+    {
+      heading: "Executive Summary",
+      prompt: "Summarize qualifications and approach.",
+      content: `Our organization brings extensive experience delivering solutions to ${rfp.agency}. We fully understand the requirements outlined in this opportunity for ${rfp.title} and have assembled a team with the precise qualifications needed to ensure successful execution.`,
+    },
+    {
+      heading: "Technical Approach",
+      prompt: "Describe methodology.",
+      content: `Our technical approach for ${rfp.title} follows industry best practices and federal standards. We will employ an agile methodology with iterative delivery milestones, ensuring continuous stakeholder engagement and rapid response to evolving requirements.`,
+    },
+    {
+      heading: "Capability Statement",
+      prompt: "Detail relevant experience.",
+      content: `We have proven experience delivering similar solutions for federal agencies, including: (1) successful implementation of enterprise-scale systems with 99.9% uptime, (2) certified personnel with relevant clearances and credentials, (3) established partnerships with leading technology vendors, and (4) a track record of on-time, on-budget delivery for contracts of comparable size and complexity.`,
+    },
+    {
+      heading: "Key Personnel",
+      prompt: "List qualified staff.",
+      content: `Our proposed team includes: (1) Program Manager with PMP certification and 15+ years of federal contracting experience, (2) Technical Lead with relevant architecture and implementation expertise, (3) Security Officer with CISSP certification and FedRAMP experience, (4) Quality Assurance Manager ensuring deliverables meet all specified requirements and standards.`,
+    },
+    {
+      heading: "Project Management Plan",
+      prompt: "Outline timeline and deliverables.",
+      content: `Our project management approach follows PMI best practices and includes: (1) detailed work breakdown structure with milestones and deliverables, (2) monthly status reports and quarterly performance reviews, (3) risk management plan with identified mitigation strategies, (4) change control process for scope modifications.`,
+    },
+    {
+      heading: "Compliance Matrix",
+      prompt: "Map requirements to approach.",
+      content: `The following compliance requirements have been identified for this opportunity. Our approach ensures full compliance with each requirement through established policies, procedures, and verified controls.`,
+    },
+    {
+      heading: "Past Performance",
+      prompt: "Provide relevant past performance examples.",
+      content: `We have successfully delivered similar projects for federal clients, including: (1) a $5M enterprise IT modernization for a cabinet-level agency completed ahead of schedule, (2) a cybersecurity assessment program for the Department of Defense covering 50+ systems, (3) a cloud migration initiative for a federal health agency processing 1M+ transactions daily.`,
+    },
+  ];
+
   return {
     id: `mock-draft-${String(i + 1).padStart(4, "0")}`,
     user_id: MOCK_USER.id,
@@ -219,16 +257,9 @@ const MOCK_DRAFTS = MOCK_RFPS.slice(0, 5).map((rfp, i) => {
     compliance_checklist: rfp.requirements.map((req) => ({
       requirement: req,
       status: "not_addressed",
-      notes: "",
+      notes: `We maintain established processes and controls to address ${req} requirements. Detailed compliance evidence will be provided in the final submission.`,
     })),
-    suggested_sections: [
-      { heading: "Executive Summary", prompt: "Summarize qualifications and approach.", content: `Our team brings extensive experience in federal contracting. We understand ${rfp.agency}'s mission and have the technical capabilities to deliver.` },
-      { heading: "Technical Approach", prompt: "Describe methodology.", content: `Our technical approach for ${rfp.title} follows industry best practices and aligns with federal standards.` },
-      { heading: "Capability Statement", prompt: "Detail relevant experience.", content: "" },
-      { heading: "Key Personnel", prompt: "List qualified staff.", content: "" },
-      { heading: "Project Management Plan", prompt: "Outline timeline and deliverables.", content: "" },
-      { heading: "Compliance Matrix", prompt: "Map requirements to approach.", content: "" },
-    ],
+    suggested_sections: sections,
     full_draft: null,
     status: "draft",
     source: "template",
