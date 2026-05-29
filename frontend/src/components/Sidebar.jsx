@@ -11,7 +11,7 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggle })
       {collapsed && (
         <button
           onClick={onToggle}
-          className="fixed top-3 left-3 z-50 lg:hidden p-2 rounded-md bg-white border border-gray-200 shadow-sm hover:bg-gray-50 active:bg-gray-100"
+          className="fixed top-1.5 left-3 z-50 lg:hidden p-2 rounded-md bg-white border border-gray-200 shadow-sm hover:bg-gray-50 active:bg-gray-100"
           aria-label="Open menu"
         >
           <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
