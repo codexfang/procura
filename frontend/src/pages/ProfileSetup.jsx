@@ -114,7 +114,7 @@ export default function ProfileSetup({ backendOnline, api }) {
         </p>
       </div>
 
-      <div className="card p-6 mb-4">
+      <div className="card p-4 sm:p-6 mb-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-4">Company Information</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -155,7 +155,7 @@ export default function ProfileSetup({ backendOnline, api }) {
         </div>
       </div>
 
-      <div className="card p-6 mb-4">
+      <div className="card p-4 sm:p-6 mb-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-4">Keywords</h2>
         <p className="text-xs text-gray-500 mb-3">
           Keywords help match your profile to relevant RFP opportunities. Add terms like "cloud migration", "FedRAMP", "cybersecurity".
@@ -187,7 +187,7 @@ export default function ProfileSetup({ backendOnline, api }) {
         </div>
       </div>
 
-      <div className="card p-6 mb-4">
+      <div className="card p-4 sm:p-6 mb-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-4">Capabilities</h2>
         <p className="text-xs text-gray-500 mb-3">
           Define your core business capabilities. Add services like "Cloud Infrastructure", "Cybersecurity", "Data Analytics".
@@ -219,7 +219,7 @@ export default function ProfileSetup({ backendOnline, api }) {
         </div>
       </div>
 
-      <div className="card p-6 mb-4">
+      <div className="card p-4 sm:p-6 mb-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-4">Tags</h2>
         <p className="text-xs text-gray-500 mb-3">
           Tags for additional filtering. Add tags like "govtech", "defense", "healthcare".

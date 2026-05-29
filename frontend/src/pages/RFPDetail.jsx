@@ -62,7 +62,7 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
         Back to dashboard
       </button>
 
-      <div className="card p-6 mb-4">
+      <div className="card p-4 sm:p-6 mb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-gray-900">{rfp.title}</h1>
@@ -117,13 +117,13 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
         </div>
       </div>
 
-      <div className="card p-4 mb-4">
+      <div className="card p-3 sm:p-4 mb-3 sm:mb-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-2">Description</h2>
-        <p className="text-sm text-gray-600 leading-relaxed">{rfp.description}</p>
+        <p className="text-sm text-gray-600 leading-relaxed break-words">{rfp.description}</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <div className="card p-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
+        <div className="card p-3 sm:p-4">
           <h2 className="text-sm font-semibold text-gray-800 mb-2">Categories</h2>
           <div className="flex flex-wrap gap-1">
             {rfp.categories?.map((cat, i) => (
@@ -131,20 +131,20 @@ export default function RFPDetail({ backendOnline, api, matchId, onBack, onGener
             ))}
           </div>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 sm:p-4">
           <h2 className="text-sm font-semibold text-gray-800 mb-2">Requirements</h2>
           <ul className="space-y-1">
             {rfp.requirements?.map((req, i) => (
               <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
                 <span className="text-gov-500 mt-0.5 shrink-0">•</span>
-                <span>{req}</span>
+                <span className="break-words">{req}</span>
               </li>
             ))}
           </ul>
         </div>
       </div>
 
-      <div className="card p-4 mb-4">
+      <div className="card p-3 sm:p-4 mb-3 sm:mb-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-2">Match Reasoning</h2>
         <div className="space-y-2">
           {match.match_reasons?.map((reason, i) => (

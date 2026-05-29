@@ -103,10 +103,9 @@ export default function App() {
         onToggle={() => setSidebarCollapsed((c) => !c)}
       />
 
-      <main className="flex-1 min-h-screen">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <header className="flex items-center justify-between mb-6 lg:mb-8">
-            <div className="lg:hidden" />
+      <main className="flex-1 min-h-screen min-w-0 max-w-full overflow-hidden">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <header className="flex items-center justify-end mb-4 sm:mb-6 lg:mb-8 min-h-0">
             <StatusIndicator backendOnline={backendOnline} />
           </header>
 

@@ -196,15 +196,15 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
       </div>
 
       {draft.full_draft && (
-        <div className="card p-4 mb-4">
+        <div className="card p-3 sm:p-4 mb-3 sm:mb-4">
           <h2 className="text-sm font-semibold text-gray-800 mb-2">AI-Generated Full Draft</h2>
-          <div className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
+          <div className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed break-words">
             {draft.full_draft}
           </div>
         </div>
       )}
 
-      <div className="card p-4 mb-4">
+      <div className="card p-3 sm:p-4 mb-3 sm:mb-4">
         <h2 className="text-sm font-semibold text-gray-800 mb-2">Overview</h2>
         <textarea
           className="input-field min-h-[80px] resize-y text-sm"
@@ -214,7 +214,7 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
       </div>
 
       {draft.compliance_checklist && draft.compliance_checklist.length > 0 && (
-        <div className="card p-4 mb-4">
+        <div className="card p-3 sm:p-4 mb-3 sm:mb-4">
           <h2 className="text-sm font-semibold text-gray-800 mb-2">Compliance Checklist</h2>
           <div className="space-y-3">
             {draft.compliance_checklist.map((item, i) => (

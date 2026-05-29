@@ -18,7 +18,7 @@ export default function RFPCard({ match, onSelect }) {
   return (
     <div
       onClick={() => onSelect?.(match)}
-      className="card p-5 hover:shadow-md transition-shadow cursor-pointer border-l-4"
+      className="card p-3 sm:p-5 hover:shadow-md transition-shadow cursor-pointer border-l-4 overflow-hidden"
       style={{
         borderLeftColor:
           relevance_score >= 75
@@ -28,23 +28,23 @@ export default function RFPCard({ match, onSelect }) {
             : "#9ca3af",
       }}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-2 sm:gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-1.5 mb-0.5">
             {!match.is_read && (
               <span className="w-2 h-2 rounded-full bg-gov-500 shrink-0" />
             )}
-            <h3 className="font-medium text-gray-900 truncate">{rfp.title}</h3>
+            <h3 className="text-sm sm:text-base font-medium text-gray-900 truncate">{rfp.title}</h3>
           </div>
-          <p className="text-sm text-gray-500 mb-2">{rfp.agency}</p>
+          <p className="text-xs sm:text-sm text-gray-500 truncate">{rfp.agency}</p>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-2xl font-bold text-gray-900">{relevance_score}</div>
+          <div className="text-lg sm:text-2xl font-bold text-gray-900 leading-none">{relevance_score}</div>
           <div className="text-xs text-gray-500">/100</div>
         </div>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-2 sm:mt-3">
         <div className="score-bar">
           <div
             className={`score-fill ${scoreColor}`}
@@ -53,10 +53,10 @@ export default function RFPCard({ match, onSelect }) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
+      <div className="mt-2 sm:mt-3 flex items-center gap-2 sm:gap-3 text-xs text-gray-500 flex-wrap">
         {daysLeft !== null && (
-          <span className={daysLeft <= 14 ? "text-red-600 font-medium" : ""}>
-            {daysLeft} days remaining
+          <span className={`${daysLeft <= 14 ? "text-red-600 font-medium" : ""}`}>
+            {daysLeft}d left
           </span>
         )}
         {rfp.award_amount && (
@@ -68,9 +68,9 @@ export default function RFPCard({ match, onSelect }) {
       </div>
 
       {match_reasons && match_reasons.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
+        <div className="mt-1.5 sm:mt-2 flex flex-wrap gap-1">
           {match_reasons.slice(0, 2).map((reason, i) => (
-            <span key={i} className="tag-blue">
+            <span key={i} className="tag-blue text-xs truncate max-w-full">
               {reason}
             </span>
           ))}
