@@ -7,6 +7,10 @@ from models.rfp_listing import RFPListing
 from models.match import Match
 
 
+def _words(text: str) -> set:
+    return set(text.lower().split())
+
+
 def calculate_relevance_score(
     rfp: RFPListing,
     user_profile: User,
@@ -25,10 +29,13 @@ def calculate_relevance_score(
     rfp_categories = set(c.lower() for c in (rfp.categories or []))
     rfp_description = (rfp.description or "").lower()
     rfp_title = (rfp.title or "").lower()
+    rfp_text_words = _words(rfp_title) | _words(rfp_description) | rfp_categories
 
     keyword_score = 0.0
     for keyword in user_keywords:
-        if keyword in rfp_title or keyword in rfp_description or keyword in rfp_categories:
+        kw_words = _words(keyword)
+        match = any(w in rfp_text_words for w in kw_words) or keyword in rfp_text_words
+        if match:
             keyword_matches.append(keyword)
             keyword_score += 15.0
     keyword_score = min(keyword_score, 35.0)
@@ -40,7 +47,9 @@ def calculate_relevance_score(
 
     capability_score = 0.0
     for capability in user_capabilities:
-        if capability in rfp_description or capability in rfp_categories:
+        cap_words = _words(capability)
+        match = any(w in rfp_text_words for w in cap_words) or capability in rfp_text_words
+        if match:
             capability_matches.append(capability)
             capability_score += 12.0
     capability_score = min(capability_score, 30.0)
@@ -51,15 +60,18 @@ def calculate_relevance_score(
         match_reasons.append(f"Capabilities matched: {', '.join(capability_matches[:3])}")
 
     industry_score = 0.0
-    if user_industry and user_industry in rfp_categories:
-        industry_score = 10.0
-        breakdown["industry_match"] = industry_score
-        score += industry_score
-        match_reasons.append("Industry category matches")
+    if user_industry:
+        industry_words = _words(user_industry.replace("-", " "))
+        if any(w in rfp_text_words for w in industry_words):
+            industry_score = 10.0
+            breakdown["industry_match"] = industry_score
+            score += industry_score
+            match_reasons.append("Industry category matches")
 
     tag_score = 0.0
     for tag in user_tags:
-        if tag in rfp_title or tag in rfp_description:
+        tag_words = _words(tag)
+        if any(w in rfp_text_words for w in tag_words) or tag in rfp_text_words:
             tag_score += 8.0
     tag_score = min(tag_score, 15.0)
     breakdown["tag_match"] = tag_score

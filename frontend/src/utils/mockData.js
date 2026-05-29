@@ -51,6 +51,16 @@ const DESCRIPTIONS = [
   "Requires proven experience delivering complex solutions in federal environments with strict security and compliance requirements.",
 ];
 
+const MOCK_USER = {
+  id: "mock-user-001",
+  email: "contractor@example.com",
+  company_name: "",
+  industry: "",
+  capabilities: [],
+  keywords: [],
+  tags: [],
+};
+
 function seededRandom(seed) {
   let s = seed * 9301 + 49297;
   s = ((s << 13) ^ s) >>> 0;
@@ -92,23 +102,17 @@ const MOCK_RFPS = Array.from({ length: 105 }, (_, i) => {
   };
 });
 
-const MOCK_USER = {
-  id: "mock-user-001",
-  email: "contractor@example.com",
-  company_name: "Apex Government Solutions",
-  industry: "information-technology",
-  capabilities: [
-    "Cloud Infrastructure", "Cybersecurity", "Data Analytics",
-    "AI/ML Solutions", "IT Service Management", "Network Engineering",
-  ],
-  keywords: [
+function calculateMockScore(rfp, seed) {
+  const userKeywords = [
     "cloud migration", "zero trust", "FedRAMP", "AI automation",
     "data interoperability", "DevSecOps", "machine learning",
-  ],
-  tags: ["govtech", "defense", "healthcare", "enterprise-it"],
-};
+  ];
+  const userCapabilities = [
+    "Cloud Infrastructure", "Cybersecurity", "Data Analytics",
+    "AI/ML Solutions", "IT Service Management", "Network Engineering",
+  ];
+  const userIndustry = "information-technology";
 
-function calculateMockScore(rfp, user) {
   let score = 0;
   const reasons = [];
   const keywordMatches = [];
@@ -116,10 +120,13 @@ function calculateMockScore(rfp, user) {
   const breakdown = {};
 
   const text = `${rfp.title} ${rfp.description} ${rfp.categories.join(" ")}`.toLowerCase();
+  const textWords = new Set(text.split(/\s+/));
 
   let ks = 0;
-  for (const kw of user.keywords) {
-    if (text.includes(kw.toLowerCase())) {
+  for (const kw of userKeywords) {
+    const kwWords = kw.toLowerCase().split(/\s+/);
+    const matchCount = kwWords.filter(w => textWords.has(w) || text.includes(w)).length;
+    if (matchCount >= 1 && text.includes(kw.toLowerCase())) {
       keywordMatches.push(kw);
       ks += 15;
     }
@@ -130,10 +137,18 @@ function calculateMockScore(rfp, user) {
   if (keywordMatches.length) reasons.push(`Keywords matched: ${keywordMatches.slice(0, 3).join(", ")}`);
 
   let cs = 0;
-  for (const cap of user.capabilities) {
-    if (text.includes(cap.toLowerCase())) {
+  for (const cap of userCapabilities) {
+    const capWords = cap.toLowerCase().split(/\s+/);
+    const matchCount = capWords.filter(w => textWords.has(w) || text.includes(w)).length;
+    if (matchCount >= 1 && text.includes(cap.toLowerCase())) {
       capabilityMatches.push(cap);
       cs += 12;
+    } else {
+      const partial = capWords.filter(w => textWords.has(w)).length;
+      if (partial >= 1) {
+        capabilityMatches.push(cap);
+        cs += 8;
+      }
     }
   }
   cs = Math.min(cs, 30);
@@ -141,7 +156,7 @@ function calculateMockScore(rfp, user) {
   score += cs;
   if (capabilityMatches.length) reasons.push(`Capabilities matched: ${capabilityMatches.slice(0, 3).join(", ")}`);
 
-  if (user.industry && rfp.categories.some((c) => c.includes(user.industry.replace("-", " ")))) {
+  if (rfp.categories.some((c) => c.includes("cloud") || c.includes("IT") || c.includes("data") || c.includes("cyber"))) {
     breakdown.industry_match = 10;
     score += 10;
     reasons.push("Industry category matches");
@@ -153,13 +168,16 @@ function calculateMockScore(rfp, user) {
     score += as;
   }
 
-  if (rfp.set_aside && user.capabilities.length) {
+  if (rfp.set_aside) {
     breakdown.set_aside = 5;
     score += 5;
   }
 
+  const baseScore = score;
+  score += (seededRandom(seed + 13) * 10) - 5;
+
   return {
-    relevance_score: Math.round(Math.min(score, 100)),
+    relevance_score: Math.round(Math.max(0, Math.min(Math.round(score), 100))),
     match_reasons: reasons,
     keyword_matches: keywordMatches,
     capability_matches: capabilityMatches,
@@ -168,7 +186,7 @@ function calculateMockScore(rfp, user) {
 }
 
 const MOCK_MATCHES = MOCK_RFPS.map((rfp, i) => {
-  const result = calculateMockScore(rfp, MOCK_USER);
+  const result = calculateMockScore(rfp, i * 7919 + 42);
   return {
     id: `mock-match-${String(i + 1).padStart(4, "0")}`,
     user_id: MOCK_USER.id,
@@ -182,42 +200,44 @@ const MOCK_MATCHES = MOCK_RFPS.map((rfp, i) => {
   };
 });
 
-const MOCK_DRAFTS = MOCK_RFPS.slice(0, 5).map((rfp, i) => ({
-  id: `mock-draft-${String(i + 1).padStart(4, "0")}`,
-  user_id: MOCK_USER.id,
-  rfp_id: rfp.id,
-  match_id: `mock-match-${String(i + 1).padStart(4, "0")}`,
-  overview: `Proposal response for ${rfp.title} issued by ${rfp.agency}.`,
-  capability_mapping: MOCK_USER.capabilities.reduce((acc, cap) => {
-    acc[cap] = {
-      matched_categories: rfp.categories.filter(
-        (c) => cap.toLowerCase().includes(c) || c.includes(cap.toLowerCase())
-      ),
-      relevance: "high",
-    };
-    return acc;
-  }, {}),
-  compliance_checklist: rfp.requirements.map((req) => ({
-    requirement: req,
-    status: "not_addressed",
-    notes: "",
-  })),
-  suggested_sections: [
-    { heading: "Executive Summary", prompt: "Summarize qualifications and approach.", content: "" },
-    { heading: "Technical Approach", prompt: "Describe methodology.", content: "" },
-    { heading: "Capability Statement", prompt: "Detail relevant experience.", content: "" },
-    { heading: "Key Personnel", prompt: "List qualified staff.", content: "" },
-    { heading: "Project Management Plan", prompt: "Outline timeline and deliverables.", content: "" },
-    { heading: "Compliance Matrix", prompt: "Map requirements to approach.", content: "" },
-  ],
-  full_draft: null,
-  status: "draft",
-  source: "template",
-  is_edited: false,
-  rfp,
-  created_at: new Date(Date.now() - (3 - i) * 86400000).toISOString(),
-  updated_at: new Date().toISOString(),
-}));
+const MOCK_DRAFTS = MOCK_RFPS.slice(0, 5).map((rfp, i) => {
+  const seed = i * 7919 + 42;
+  const overviewTexts = [
+    `This proposal outlines ${rfp.title} for ${rfp.agency}. Our approach leverages proven methodologies and deep domain expertise to deliver exceptional results.`,
+    `In response to ${rfp.agency}'s requirements for ${rfp.title}, we present a comprehensive solution built on years of federal contracting experience.`,
+    `${rfp.agency} requires a strategic partner for ${rfp.title}. Our team brings specialized expertise and a track record of successful delivery.`,
+    `We are pleased to submit this proposal for ${rfp.title}. Our approach aligns directly with ${rfp.agency}'s mission objectives and technical requirements.`,
+  ];
+
+  return {
+    id: `mock-draft-${String(i + 1).padStart(4, "0")}`,
+    user_id: MOCK_USER.id,
+    rfp_id: rfp.id,
+    match_id: `mock-match-${String(i + 1).padStart(4, "0")}`,
+    overview: pick(overviewTexts, seed),
+    capability_mapping: {},
+    compliance_checklist: rfp.requirements.map((req) => ({
+      requirement: req,
+      status: "not_addressed",
+      notes: "",
+    })),
+    suggested_sections: [
+      { heading: "Executive Summary", prompt: "Summarize qualifications and approach.", content: `Our team brings extensive experience in federal contracting. We understand ${rfp.agency}'s mission and have the technical capabilities to deliver.` },
+      { heading: "Technical Approach", prompt: "Describe methodology.", content: `Our technical approach for ${rfp.title} follows industry best practices and aligns with federal standards.` },
+      { heading: "Capability Statement", prompt: "Detail relevant experience.", content: "" },
+      { heading: "Key Personnel", prompt: "List qualified staff.", content: "" },
+      { heading: "Project Management Plan", prompt: "Outline timeline and deliverables.", content: "" },
+      { heading: "Compliance Matrix", prompt: "Map requirements to approach.", content: "" },
+    ],
+    full_draft: null,
+    status: "draft",
+    source: "template",
+    is_edited: false,
+    rfp,
+    created_at: new Date(Date.now() - (3 - i) * 86400000).toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+});
 
 export const mockData = {
   user: MOCK_USER,

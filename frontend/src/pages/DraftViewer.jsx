@@ -3,6 +3,39 @@ import DraftSection from "../components/DraftSection";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { mockData } from "../utils/mockData";
 
+function generateDraftFromMatch(match) {
+  const rfp = match.rfp || {};
+  return {
+    id: "generated-" + Date.now(),
+    user_id: "local",
+    rfp_id: rfp.id || "",
+    match_id: match.id || "",
+    overview: `Proposal response for ${rfp.title || "Untitled Opportunity"} issued by ${rfp.agency || "Federal Agency"}. Our team brings extensive experience in federal contracting and a proven track record of delivering complex solutions. This draft outlines our approach, capabilities, and qualifications for fulfilling the requirements outlined in this solicitation.`,
+    capability_mapping: {},
+    compliance_checklist: (rfp.requirements || []).map((req) => ({
+      requirement: req,
+      status: "not_addressed",
+      notes: "",
+    })),
+    suggested_sections: [
+      { heading: "Executive Summary", prompt: "Summarize qualifications and approach.", content: `Our organization has extensive experience delivering solutions similar to the requirements outlined in this opportunity from ${rfp.agency}. We understand the mission-critical nature of this work and have assembled a team with the exact qualifications needed.` },
+      { heading: "Technical Approach", prompt: "Describe methodology.", content: `Our technical approach for this engagement follows industry best practices and aligns with federal standards. We will employ an agile methodology with iterative delivery milestones.` },
+      { heading: "Capability Statement", prompt: "Detail relevant experience.", content: "" },
+      { heading: "Key Personnel", prompt: "List qualified staff.", content: "" },
+      { heading: "Project Management Plan", prompt: "Outline timeline and deliverables.", content: "" },
+      { heading: "Compliance Matrix", prompt: "Map requirements to approach.", content: "" },
+      { heading: "Past Performance", prompt: "Provide relevant past performance examples.", content: "" },
+    ],
+    full_draft: null,
+    status: "draft",
+    source: "template",
+    is_edited: false,
+    rfp,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
 export default function DraftViewer({ backendOnline, api, draftId, matchId, onBack }) {
   const [draft, setDraft] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,24 +43,34 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
 
   useEffect(() => {
     loadDraft();
-  }, [draftId, backendOnline]);
+  }, [draftId, matchId, backendOnline]);
 
   async function loadDraft() {
     setLoading(true);
     try {
-      if (backendOnline && draftId && !draftId.startsWith("mock-")) {
+      if (backendOnline && draftId && !draftId.startsWith("mock-") && !draftId.startsWith("generated-")) {
         const data = await api.drafts.get(draftId);
         setDraft(data);
       } else if (matchId) {
         const found = mockData.drafts.find(
           (d) => d.match_id === matchId || d.rfp_id === matchId
         );
-        setDraft(found || mockData.drafts[0]);
+        if (found) {
+          setDraft(found);
+        } else {
+          const match = mockData.matches.find((m) => m.id === matchId);
+          if (match) {
+            setDraft(generateDraftFromMatch(match));
+          } else {
+            setDraft(generateDraftFromMatch(mockData.matches[0]));
+          }
+        }
       } else {
-        setDraft(mockData.drafts[0]);
+        setDraft(mockData.drafts[0] || generateDraftFromMatch(mockData.matches[0]));
       }
     } catch {
-      setDraft(mockData.drafts[0]);
+      const match = mockData.matches.find((m) => m.id === matchId);
+      setDraft(generateDraftFromMatch(match || mockData.matches[0]));
     } finally {
       setLoading(false);
     }
@@ -46,7 +89,7 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
   async function handleSave() {
     setSaving(true);
     try {
-      if (backendOnline && draft && !draft.id.startsWith("mock-")) {
+      if (backendOnline && draft && !draft.id.startsWith("mock-") && !draft.id.startsWith("generated-")) {
         await api.drafts.update(draft.id, {
           suggested_sections: draft.suggested_sections,
           overview: draft.overview,
@@ -74,7 +117,7 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `procura-draft-${draft.rfp?.title?.slice(0, 30).replace(/\s+/g, "-").toLowerCase() || "draft"}.txt`;
+    a.download = `procura-draft-${(draft.rfp?.title || "draft").slice(0, 30).replace(/\s+/g, "-").toLowerCase()}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -96,17 +139,15 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
       </button>
 
       <div className="flex items-start justify-between gap-4 mb-4">
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-gray-900">Proposal Draft</h1>
-          {rfp && <p className="text-sm text-gray-500 mt-1">{rfp.title}</p>}
+          {rfp && <p className="text-sm text-gray-500 mt-1 truncate">{rfp.title}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span className={`tag ${draft.source === "ai_generated" ? "tag-green" : "tag-gray"}`}>
-            {draft.source === "ai_generated" ? "AI Generated" : "Template"}
+            {draft.source === "ai_generated" ? "AI" : "Template"}
           </span>
-          <span className={`tag ${draft.status === "draft" ? "tag-blue" : "tag-green"}`}>
-            {draft.status}
-          </span>
+          <span className="tag-blue">{draft.status}</span>
         </div>
       </div>
 
@@ -152,7 +193,7 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
               <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-gov-600 focus:ring-gov-500"
+                  className="rounded border-gray-300 text-gov-600 focus:ring-gov-500 shrink-0"
                   checked={item.status === "addressed"}
                   onChange={() => {
                     const updated = [...draft.compliance_checklist];
@@ -186,7 +227,7 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
         </div>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <button onClick={handleSave} disabled={saving} className="btn-primary">
           {saving ? "Saving..." : "Save Draft"}
         </button>
@@ -195,8 +236,7 @@ export default function DraftViewer({ backendOnline, api, draftId, matchId, onBa
         </button>
         <button
           onClick={() => {
-            const text = draft.overview || "";
-            navigator.clipboard?.writeText(text);
+            navigator.clipboard?.writeText(draft.overview || "");
           }}
           className="btn-secondary"
         >

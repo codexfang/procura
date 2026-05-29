@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import RFPCard from "../components/RFPCard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { mockData } from "../utils/mockData";
@@ -8,6 +8,7 @@ export default function Dashboard({ backendOnline, api, onSelectMatch }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     loadData();
@@ -25,29 +26,44 @@ export default function Dashboard({ backendOnline, api, onSelectMatch }) {
         setStats(statsRes);
       } else {
         setMatches(mockData.matches);
-        setStats({ total: mockData.rfps.length, open: mockData.rfps.length, agencies: 4 });
+        setStats({ total: mockData.rfps.length, open: mockData.rfps.length, agencies: 20 });
       }
     } catch {
       setMatches(mockData.matches);
-      setStats({ total: mockData.rfps.length, open: mockData.rfps.length, agencies: 4 });
+      setStats({ total: mockData.rfps.length, open: mockData.rfps.length, agencies: 20 });
     } finally {
       setLoading(false);
     }
   }
 
-  const filtered =
-    filter === "all"
-      ? matches
-      : filter === "high"
-      ? matches.filter((m) => m.relevance_score >= 75)
-      : matches.filter((m) => m.status === filter);
+  const filtered = useMemo(() => {
+    let result = matches;
 
-  const avgScore =
-    matches.length > 0
-      ? Math.round(
-          matches.reduce((s, m) => s + m.relevance_score, 0) / matches.length
-        )
-      : 0;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter((m) => {
+        const rfp = m.rfp || {};
+        return (
+          (rfp.title || "").toLowerCase().includes(q) ||
+          (rfp.agency || "").toLowerCase().includes(q) ||
+          (rfp.naics_code || "").toLowerCase().includes(q) ||
+          (m.match_reasons || []).some((r) => r.toLowerCase().includes(q))
+        );
+      });
+    }
+
+    if (filter === "high") {
+      result = result.filter((m) => m.relevance_score >= 65);
+    } else if (filter !== "all") {
+      result = result.filter((m) => m.status === filter);
+    }
+
+    return result;
+  }, [matches, search, filter]);
+
+  const avgScore = matches.length > 0
+    ? Math.round(matches.reduce((s, m) => s + m.relevance_score, 0) / matches.length)
+    : 0;
 
   if (loading) return <LoadingSpinner message="Loading dashboard..." />;
 
@@ -60,44 +76,63 @@ export default function Dashboard({ backendOnline, api, onSelectMatch }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="card p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Total Matches</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.total || 0}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div className="card p-3 lg:p-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Total</p>
+          <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.total || 0}</p>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider">Open</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{stats?.open || 0}</p>
+          <p className="text-xl lg:text-2xl font-bold text-green-600 mt-1">{stats?.open || 0}</p>
         </div>
-        <div className="card p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Avg Relevance</p>
-          <p className="text-2xl font-bold text-gov-600 mt-1">{avgScore}%</p>
+        <div className="card p-3 lg:p-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Avg Score</p>
+          <p className="text-xl lg:text-2xl font-bold text-gov-600 mt-1">{avgScore}%</p>
         </div>
-        <div className="card p-4">
+        <div className="card p-3 lg:p-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider">Agencies</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.agencies || 0}</p>
+          <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.agencies || 0}</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-4">
-        {["all", "high", "pending", "reviewed"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              filter === f
-                ? "bg-gov-600 text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            className="input-field pl-9"
+            placeholder="Search by title, agency, NAICS code..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {["all", "high", "pending", "reviewed"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
+                filter === f
+                  ? "bg-gov-600 text-white"
+                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {f === "high" ? "High Match" : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
+
+      <p className="text-xs text-gray-400 mb-3">
+        Showing {filtered.length} of {matches.length} matches
+      </p>
 
       {filtered.length === 0 ? (
         <div className="card p-8 text-center">
-          <p className="text-gray-500">No matches found for this filter.</p>
+          <p className="text-gray-500">
+            {search ? "No matches match your search." : "No matches found for this filter."}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
