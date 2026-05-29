@@ -18,7 +18,7 @@ export default function Dashboard({ backendOnline, api, onSelectMatch }) {
     try {
       if (backendOnline) {
         const [matchRes, statsRes] = await Promise.all([
-          api.matches.list(mockData.user.id, { limit: 50 }),
+          api.matches.list(mockData.user.id, { limit: 200 }),
           api.rfps.stats(),
         ]);
         setMatches(matchRes.items || []);

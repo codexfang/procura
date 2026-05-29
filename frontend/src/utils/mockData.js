@@ -1,124 +1,112 @@
+const AGENCIES = [
+  "Department of Homeland Security", "Department of Defense", "General Services Administration",
+  "Department of Veterans Affairs", "Department of Energy", "Department of the Treasury",
+  "Department of Health and Human Services", "Department of Transportation", "Department of Commerce",
+  "Department of Justice", "Department of State", "Department of the Interior",
+  "Department of Agriculture", "Department of Education", "National Aeronautics and Space Administration",
+  "National Security Agency", "Federal Bureau of Investigation", "Environmental Protection Agency",
+  "Social Security Administration", "National Institutes of Health",
+];
+
+const CATEGORIES = [
+  ["cloud", "infrastructure", "cybersecurity", "IT services"],
+  ["AI", "machine learning", "document processing", "automation"],
+  ["cybersecurity", "penetration testing", "risk assessment", "defense"],
+  ["healthcare", "data interoperability", "FHIR", "API"],
+  ["geospatial", "intelligence", "data analytics", "satellite"],
+  ["ITSM", "help desk", "ITIL", "service management"],
+  ["zero trust", "network security", "identity management", "cybersecurity"],
+  ["data analytics", "business intelligence", "reporting", "dashboards"],
+  ["software development", "DevSecOps", "agile", "microservices"],
+  ["network", "telecommunications", "5G", "broadband"],
+  ["training", "workforce development", "e-learning", "simulation"],
+  ["cloud migration", "AWS", "Azure", "GCP"],
+  ["IoT", "sensors", "edge computing", "industrial control"],
+  ["blockchain", "distributed ledger", "smart contracts", "supply chain"],
+  ["robotics", "automation", "RPA", "process optimization"],
+];
+
+const REQUIREMENTS_POOL = [
+  "FedRAMP Moderate", "FedRAMP High", "SOC 2 Type II", "ISO 27001",
+  "HIPAA compliance", "NIST SP 800-53", "NIST SP 800-171", "CMMC Level 2",
+  "Section 508 compliance", "Top Secret clearance", "TS/SCI clearance",
+  "ITIL 4 certification", "FIPS 140-2", "HITRUST CSF", "FISMA compliance",
+];
+
+const MODIFIERS = [
+  "Enterprise", "Advanced", "Integrated", "Secure", "Automated",
+  "Cloud-Native", "AI-Enabled", "Real-Time", "Comprehensive", "Modernized",
+];
+
+const FOCUS = [
+  "Infrastructure", "Operations", "Platform", "Management", "Analytics",
+  "Integration", "Automation", "Monitoring", "Migration", "Support",
+];
+
+const DESCRIPTIONS = [
+  "Seeks qualified vendors to provide comprehensive solutions supporting mission-critical operations across multiple facilities nationwide.",
+  "Requires advanced capabilities to enhance operational efficiency and maintain compliance with federal standards.",
+  "Announces this solicitation for integrated services to address critical requirements across the enterprise environment.",
+  "Seeks proposals for a scalable platform to enhance core capabilities and support future mission growth.",
+  "Requires proven experience delivering complex solutions in federal environments with strict security and compliance requirements.",
+];
+
+function seededRandom(seed) {
+  let s = seed * 9301 + 49297;
+  s = ((s << 13) ^ s) >>> 0;
+  return (s % 10000) / 10000;
+}
+
+function pick(arr, seed) {
+  return arr[Math.floor(seededRandom(seed) * arr.length)];
+}
+
+function pickN(arr, n, seed) {
+  const shuffled = [...arr].sort((a, b) => seededRandom(seed + a.length) - 0.5);
+  return shuffled.slice(0, n);
+}
+
+const MOCK_RFPS = Array.from({ length: 105 }, (_, i) => {
+  const seed = i * 7919 + 42;
+  const agency = pick(AGENCIES, seed);
+  const cats = pick(CATEGORIES, seed + 1);
+  const deadlineDays = Math.floor(seededRandom(seed + 2) * 76) + 14;
+  const awardAmount = Math.floor(seededRandom(seed + 3) * 20000000) + 500000;
+  const modifier = pick(MODIFIERS, seed + 4);
+  const focus = pick(FOCUS, seed + 5);
+  const postedDaysAgo = Math.floor(seededRandom(seed + 6) * 60) + 1;
+
+  return {
+    id: `mock-rfp-${String(i + 1).padStart(4, "0")}`,
+    title: `${modifier} ${cats[0].charAt(0).toUpperCase() + cats[0].slice(1)} ${focus} Platform - ${agency.split(" ").pop()}`,
+    agency,
+    description: `The ${agency} ${pick(DESCRIPTIONS, seed + 7)}`,
+    naics_code: pick(["541512", "541511", "541690", "541519", "541360", "541330", "541990"], seed + 8),
+    set_aside: pick(["Small Business", "8(a)", "Service-Disabled Veteran-Owned", "HUBZone", "Women-Owned Small Business", null], seed + 9),
+    posted_date: new Date(Date.now() - postedDaysAgo * 86400000).toISOString(),
+    response_deadline: new Date(Date.now() + deadlineDays * 86400000).toISOString(),
+    award_amount: awardAmount,
+    status: pick(["open", "open", "open", "open", "closed", "awarded"], seed + 10),
+    categories: cats,
+    requirements: pickN(REQUIREMENTS_POOL, Math.floor(seededRandom(seed + 11) * 3) + 2, seed + 12),
+  };
+});
+
 const MOCK_USER = {
   id: "mock-user-001",
   email: "contractor@example.com",
   company_name: "Apex Government Solutions",
   industry: "information-technology",
   capabilities: [
-    "Cloud Infrastructure",
-    "Cybersecurity",
-    "Data Analytics",
-    "AI/ML Solutions",
-    "IT Service Management",
+    "Cloud Infrastructure", "Cybersecurity", "Data Analytics",
+    "AI/ML Solutions", "IT Service Management", "Network Engineering",
   ],
   keywords: [
-    "cloud migration",
-    "zero trust",
-    "FedRAMP",
-    "AI automation",
-    "data interoperability",
+    "cloud migration", "zero trust", "FedRAMP", "AI automation",
+    "data interoperability", "DevSecOps", "machine learning",
   ],
   tags: ["govtech", "defense", "healthcare", "enterprise-it"],
 };
-
-const MOCK_RFPS = [
-  {
-    id: "mock-rfp-001",
-    title: "Enterprise Cloud Infrastructure Modernization Services",
-    agency: "Department of Homeland Security",
-    description:
-      "The Department of Homeland Security seeks qualified vendors to provide enterprise cloud infrastructure modernization services, including migration planning, implementation, and ongoing management of cloud-based systems for mission-critical applications. The contractor will be responsible for assessing current infrastructure, developing migration strategies, executing cloud migrations, and providing post-migration support across multiple DHS components.",
-    naics_code: "541512",
-    set_aside: "Small Business",
-    posted_date: "2026-05-15T10:00:00Z",
-    response_deadline: "2026-06-29T17:00:00Z",
-    award_amount: 12000000,
-    status: "open",
-    categories: ["cloud", "infrastructure", "cybersecurity", "IT services"],
-    requirements: [
-      "SOC 2 compliance",
-      "FedRAMP certification",
-      "CMMC Level 3",
-      "Active TS/SCI clearance for lead personnel",
-    ],
-  },
-  {
-    id: "mock-rfp-002",
-    title: "AI-Powered Document Processing and Workflow Automation Platform",
-    agency: "General Services Administration",
-    description:
-      "GSA requires an AI-powered document processing and workflow automation platform capable of handling large volumes of government forms, extracting structured data, and integrating with existing federal record management systems. The solution must support multiple document formats and provide real-time processing capabilities.",
-    naics_code: "541511",
-    set_aside: "8(a)",
-    posted_date: "2026-05-12T08:00:00Z",
-    response_deadline: "2026-07-11T17:00:00Z",
-    award_amount: 8000000,
-    status: "open",
-    categories: ["AI", "machine learning", "document processing", "automation"],
-    requirements: [
-      "FedRAMP Moderate",
-      "Section 508 compliance",
-      "FIPS 140-2",
-      "API-first architecture",
-    ],
-  },
-  {
-    id: "mock-rfp-003",
-    title: "Cybersecurity Risk Assessment and Penetration Testing Services",
-    agency: "Department of Defense",
-    description:
-      "The DoD is seeking cybersecurity risk assessment and penetration testing services for its network infrastructure, including vulnerability assessments, threat modeling, and remediation planning across classified and unclassified environments.",
-    naics_code: "541690",
-    set_aside: "Service-Disabled Veteran-Owned",
-    posted_date: "2026-05-10T09:00:00Z",
-    response_deadline: "2026-06-09T17:00:00Z",
-    award_amount: 5000000,
-    status: "open",
-    categories: ["cybersecurity", "penetration testing", "risk assessment", "defense"],
-    requirements: [
-      "Top Secret clearance",
-      "CISSP-certified staff",
-      "NIST SP 800-53 compliance",
-    ],
-  },
-  {
-    id: "mock-rfp-004",
-    title: "Healthcare Data Interoperability and FHIR API Integration Platform",
-    agency: "Department of Veterans Affairs",
-    description:
-      "The VA requires a healthcare data interoperability platform using FHIR standards to enable seamless data exchange between VA medical facilities, community care providers, and third-party health applications.",
-    naics_code: "541512",
-    set_aside: "Small Business",
-    posted_date: "2026-05-08T11:00:00Z",
-    response_deadline: "2026-06-27T17:00:00Z",
-    award_amount: 10000000,
-    status: "open",
-    categories: ["healthcare", "data interoperability", "FHIR", "API"],
-    requirements: [
-      "HIPAA compliance",
-      "FHIR R4 certification",
-      "HITRUST CSF",
-    ],
-  },
-  {
-    id: "mock-rfp-005",
-    title: "Zero Trust Architecture Implementation and Network Modernization",
-    agency: "Department of Energy",
-    description:
-      "The DOE is seeking vendors to design and implement a Zero Trust Architecture across its national laboratory network, including identity management, micro-segmentation, continuous monitoring, and automated threat response.",
-    naics_code: "541512",
-    set_aside: "Small Business",
-    posted_date: "2026-05-05T10:00:00Z",
-    response_deadline: "2026-06-29T17:00:00Z",
-    award_amount: 15000000,
-    status: "open",
-    categories: ["zero trust", "network security", "identity management", "cybersecurity"],
-    requirements: [
-      "Zero Trust Maturity Model expertise",
-      "FedRAMP High",
-      "NIST 800-207",
-    ],
-  },
-];
 
 function calculateMockScore(rfp, user) {
   let score = 0;
@@ -182,25 +170,23 @@ function calculateMockScore(rfp, user) {
 const MOCK_MATCHES = MOCK_RFPS.map((rfp, i) => {
   const result = calculateMockScore(rfp, MOCK_USER);
   return {
-    id: `mock-match-${String(i + 1).padStart(3, "0")}`,
+    id: `mock-match-${String(i + 1).padStart(4, "0")}`,
     user_id: MOCK_USER.id,
     rfp_id: rfp.id,
     ...result,
-    status: i === 0 ? "reviewed" : "pending",
-    is_read: i < 2,
+    status: i < 5 ? "reviewed" : "pending",
+    is_read: i < 10,
     rfp,
-    created_at: new Date(
-      Date.now() - (MOCK_RFPS.length - i) * 86400000
-    ).toISOString(),
+    created_at: new Date(Date.now() - (MOCK_RFPS.length - i) * 86400000).toISOString(),
     updated_at: new Date().toISOString(),
   };
 });
 
-const MOCK_DRAFTS = MOCK_RFPS.slice(0, 3).map((rfp, i) => ({
-  id: `mock-draft-${String(i + 1).padStart(3, "0")}`,
+const MOCK_DRAFTS = MOCK_RFPS.slice(0, 5).map((rfp, i) => ({
+  id: `mock-draft-${String(i + 1).padStart(4, "0")}`,
   user_id: MOCK_USER.id,
   rfp_id: rfp.id,
-  match_id: `mock-match-${String(i + 1).padStart(3, "0")}`,
+  match_id: `mock-match-${String(i + 1).padStart(4, "0")}`,
   overview: `Proposal response for ${rfp.title} issued by ${rfp.agency}.`,
   capability_mapping: MOCK_USER.capabilities.reduce((acc, cap) => {
     acc[cap] = {
@@ -229,9 +215,7 @@ const MOCK_DRAFTS = MOCK_RFPS.slice(0, 3).map((rfp, i) => ({
   source: "template",
   is_edited: false,
   rfp,
-  created_at: new Date(
-    Date.now() - (3 - i) * 86400000
-  ).toISOString(),
+  created_at: new Date(Date.now() - (3 - i) * 86400000).toISOString(),
   updated_at: new Date().toISOString(),
 }));
 

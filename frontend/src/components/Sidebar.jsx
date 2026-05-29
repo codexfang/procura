@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
   { id: "rfp-detail", label: "RFP Detail", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
@@ -32,20 +30,15 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggle })
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-40 h-full w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed top-0 left-0 z-40 h-full w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
           collapsed ? "-translate-x-full" : "translate-x-0"
         }`}
       >
-        <div className="flex items-center h-16 px-6 border-b border-gray-200">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-gov-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
-            <span className="font-semibold text-lg text-gray-900">Procura</span>
-          </div>
+        <div className="flex items-center h-14 px-6 border-b border-gray-200 shrink-0">
+          <span className="font-semibold text-lg text-gray-900">Procura</span>
         </div>
 
-        <nav className="p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
@@ -67,10 +60,10 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggle })
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="flex items-center gap-3 px-4 py-2 text-xs text-gray-500">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-            System Online
+        <div className="shrink-0 px-4 py-3 border-t border-gray-200">
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+            <span>System Online</span>
           </div>
         </div>
       </aside>
