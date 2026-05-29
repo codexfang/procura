@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from db.database import get_db
-from db.database import engine
 from scheduler.scheduler import get_scheduler_status
 from datetime import datetime
 
@@ -20,7 +20,7 @@ def health_check():
 @router.get("/health/db")
 def database_health(db: Session = Depends(get_db)):
     try:
-        db.execute(db.text("SELECT 1"))
+        db.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception:
         db_status = "disconnected"
@@ -46,7 +46,7 @@ def scheduler_health():
 def full_health_check(db: Session = Depends(get_db)):
     db_status = False
     try:
-        db.execute(db.text("SELECT 1"))
+        db.execute(text("SELECT 1"))
         db_status = True
     except Exception:
         pass
