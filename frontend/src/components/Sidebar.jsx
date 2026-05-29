@@ -8,19 +8,17 @@ const NAV_ITEMS = [
 export default function Sidebar({ activeView, onNavigate, collapsed, onToggle }) {
   return (
     <>
-      <button
-        onClick={onToggle}
-        className="fixed top-3 left-3 z-50 lg:hidden p-2 rounded-md bg-white border border-gray-200 shadow-sm hover:bg-gray-50 active:bg-gray-100"
-        aria-label="Toggle sidebar"
-      >
-        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          {collapsed ? (
+      {collapsed && (
+        <button
+          onClick={onToggle}
+          className="fixed top-3 left-3 z-50 lg:hidden p-2 rounded-md bg-white border border-gray-200 shadow-sm hover:bg-gray-50 active:bg-gray-100"
+          aria-label="Open menu"
+        >
+          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          )}
-        </svg>
-      </button>
+          </svg>
+        </button>
+      )}
 
       {!collapsed && (
         <div
@@ -34,8 +32,17 @@ export default function Sidebar({ activeView, onNavigate, collapsed, onToggle })
           collapsed ? "-translate-x-full" : "translate-x-0"
         }`}
       >
-        <div className="flex items-center h-14 px-5 border-b border-gray-200 shrink-0">
+        <div className="flex items-center justify-between h-14 px-5 border-b border-gray-200 shrink-0">
           <span className="font-semibold text-lg text-gray-900">Procura</span>
+          <button
+            onClick={onToggle}
+            className="lg:hidden p-1.5 -mr-1.5 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+            aria-label="Close menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
